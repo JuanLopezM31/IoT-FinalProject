@@ -10,6 +10,7 @@
 ### Arquitectura del Sistema
 El sistema se basa en una arquitectura cliente-servidor donde el ESP32 actúa como punto de acceso (AP) o estación, sirviendo una interfaz HTML/JS. Los comandos de control se envían al puente H L298N para manejar los motores DC.
 
+<img width="325" height="292" alt="image" src="https://github.com/user-attachments/assets/601c8477-0472-4feb-b1f7-25917699dbcf" />
 
 
 ### Presupuesto Económico
