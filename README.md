@@ -439,4 +439,13 @@ La limitación más relevante del prototipo es la **inestabilidad en las lectura
 
 ---
 
+## 11. Referencias Bibliográficas
+
+[1] ESP32 Core for Arduino, "WiFi and WiFiClientSecure Documentation," Espressif Systems, 2024. [En línea]. Disponible en: https://github.com/espressif/arduino-esp32
+[2] HiveMQ, "HiveMQ MQTT Client Library for Java/Kotlin," HiveMQ GmbH, 2025. [En línea]. Disponible en: https://github.com/hivemq/hivemq-mqtt-client
+[3] J. Case et al., "A Simple Network Management Protocol (SNMP)," RFC 1157, May 1990. (Adaptado conceptualmente para Mosquitto MQTT Broker en AWS EC2, 2026).
+[4] Eclipse Foundation, "Eclipse Paho and Mosquitto Security Configuration with TLS," Eclipse IoT Project, 2024. [En línea]. Disponible en: https://mosquitto.org/documentation/
+
+---
+
 *Documentación del proyecto Carro RC IoT — Internet de las Cosas, Universidad de La Sabana 2026.*
