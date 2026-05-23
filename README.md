@@ -44,7 +44,26 @@
      ============================================================ -->
 
 ```mermaid
-INSERTAR AQUÍ — Diagrama de bloques de arquitectura (flowchart LR)
+graph LR
+    subgraph Cliente_Android [App Android - Jetpack Compose]
+        A[UI Control Center] -->|Comandos 2 Bytes| B(MqttManager TLS)
+    end
+
+    subgraph Nube_AWS [AWS EC2 Cloud]
+        C[Broker Mosquitto Port:8883]
+    end
+
+    subgraph Hardware_Carro [Prototipo Embebido]
+        D(WiFiClientSecure) -->|Suscribe Control| E[ESP32 Core]
+        E -->|PWM / Pines Logica| F[Puente H L298N]
+        F -->|Voltaje Variable| G[Motores DC]
+        H[Sensor HC-020K] -->|Interrupciones ISR| E
+        E -->|Publica RPM 2 Bytes| D
+    end
+
+    B <-->|MQTTS Encriptado TLS| C
+    C <-->|MQTTS Encriptado TLS| D
+    E -.->|HTTP GET /status| I[Red Local WiFi]
 ```
 
 **Descripción del flujo:**
