@@ -94,7 +94,21 @@ graph LR
      ============================================================ -->
 
 ```mermaid
-INSERTAR AQUÍ — sequenceDiagram de control (press-and-hold + STOP)
+sequenceDiagram
+    autonumber
+    actor Usuario
+    participant App as App Android
+    participant Broker as Broker AWS (Mosquitto)
+    participant ESP as ESP32 (Carro)
+
+    loop Cada 500ms mientras se mantiene presionado
+        Usuario->>App: Mantiene presionado D-pad
+        App->>Broker: PUBLISH carro/control [0x46, 0xFF] (QoS 0)
+        Broker->>ESP: Forward Comando a los Motores
+    end
+    Usuario->>App: Suelta el botón
+    App->>Broker: PUBLISH carro/control [0x53, 0x00] (QoS 1)
+    Broker->>ESP: Forward Comando STOP
 ```
 
 ### 3.2 Secuencia de telemetría (ESP32 → App)
@@ -111,7 +125,20 @@ INSERTAR AQUÍ — sequenceDiagram de control (press-and-hold + STOP)
      ============================================================ -->
 
 ```mermaid
-INSERTAR AQUÍ — sequenceDiagram de telemetría (ESP32 → App cada 250ms)
+sequenceDiagram
+    autonumber
+    participant Sensor as Sensor HC-020K
+    participant ESP as ESP32 (Carro)
+    participant Broker as Broker AWS (Mosquitto)
+    participant App as App Android
+
+    loop Cada 250ms continuamente
+        Sensor->>ESP: Genera pulsos por interrupcion (Paso de ranuras)
+        ESP->>ESP: Calcula RPM actuales
+        ESP->>Broker: PUBLISH carro/telemetria [RPM_High, RPM_Low] (QoS 1)
+        Broker->>App: Forward Datos de Velocidad
+        App->>App: Actualiza interfaz (Tacometro)
+    end
 ```
 
 ### 3.3 Watchdog de seguridad
@@ -128,7 +155,20 @@ INSERTAR AQUÍ — sequenceDiagram de telemetría (ESP32 → App cada 250ms)
      ============================================================ -->
 
 ```mermaid
-INSERTAR AQUÍ — flowchart del watchdog de seguridad
+flowchart TD
+    Start([Inicio loop principal ESP32]) --> Recv{¿Llego mensaje MQTT?}
+    
+    Recv -- Si --> Update[Actualizar Motores con nueva Dir/Vel]
+    Update --> ResetWD[Reiniciar Temporizador Watchdog: t_ultimo = millis]
+    ResetWD --> CheckTime
+    
+    Recv -- No --> CheckTime{¿millis - t_ultimo > 1500 ms?}
+    
+    CheckTime -- Si (Se perdio señal) --> ActionWD[WATCHDOG TRIGGERED: Frenado de emergencia]
+    ActionWD --> SetStop[Fijar velocidad en 0 y Estado STOP]
+    SetStop --> EndLoop([Fin del ciclo])
+    
+    CheckTime -- No (Conexion segura) --> EndLoop
 ```
 
 ---
@@ -266,7 +306,48 @@ Verifica que el ESP32 está encendido, conectado a WiFi y al broker MQTT. Funcio
      ============================================================ -->
 
 ```mermaid
-INSERTAR AQUÍ — Esquemático de interconexión de componentes
+graph TD
+    subgraph Alimentacion [Fuentes de Poder]
+        Pilas[Pack Pilas AA ~6V]
+        USB[Cable USB / Powerbank 5V]
+    end
+
+    subgraph Logica [Control de Datos]
+        ESP[ESP32 DevKit V1]
+    end
+
+    subgraph Potencia [Actuadores y Driver]
+        L298N[Puente H L298N]
+        MotIzq[Motor Izquierdo DC]
+        MotDer[Motor Derecho DC]
+    end
+
+    subgraph Retroalimentacion [Sensores]
+        HC020K[Sensor RPM HC-020K]
+    end
+
+    %% Conexiones de Alimentación
+    Pilas -->|6V MTR / GND| L298N
+    USB -->|5V / GND| ESP
+    ESP -->|VCC 5V / GND| HC020K
+
+    %% Conexiones ESP32 a L298N
+    ESP -->|GPIO 25 PWM| L298N
+    ESP -->|GPIO 26 / 27 Logic| L298N
+    ESP -->|GPIO 33 PWM| L298N
+    ESP -->|GPIO 12 / 14 Logic| L298N
+
+    %% Conexiones L298N a Motores
+    L298N -->|OUT1 / OUT2| MotIzq
+    L298N -->|OUT3 / OUT4| MotDer
+
+    %% Conexiones Sensor a ESP32
+    HC020K -->|GPIO 34 Pulso Digital| ESP
+
+    %% Estilos Visuales
+    style ESP fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style L298N fill:#ffe0b2,stroke:#e65100,stroke-width:2px
+    style Pilas fill:#ffcdd2,stroke:#b71c1c,stroke-width:2px
 ```
 
 ---
