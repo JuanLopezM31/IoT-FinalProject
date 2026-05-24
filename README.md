@@ -1,7 +1,7 @@
 # 🚗 Carro RC IoT — ESP32 + MQTT + Android
 
 **Curso:** Internet de las Cosas — Universidad de La Sabana, 2026  
-**Descripción:** Vehículo a escala controlado remotamente desde una app Android, con telemetría de velocidad (RPM) en tiempo real a través de un broker MQTT seguro desplegado en AWS EC2.
+**Descripción:** Vehículo a escala controlado remotamente desde una app Android, con telemetría de velocidad (RPM) en tiempo real a través de un broker MQTT seguro desplegado en AWS EC2
 **Viabilidad Económica y Tecnológica:** El costo total del hardware del prototipo asciende a $121.000 COP, posicionándose como una solución educativa de bajo costo un 70% más económica que las plataformas comerciales de desarrollo IoT de arquitectura cerrada. Al emplear infraestructura en la nube bajo la capa gratuita de AWS (EC2 Micro) y software de código abierto (Mosquitto, Android Jetpack Compose), la solución es altamente replicable y viable para su implementación en laboratorios de robótica universitaria a gran escala.
 
 ---
