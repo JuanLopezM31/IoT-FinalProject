@@ -449,6 +449,10 @@ La limitación más relevante del prototipo es la **inestabilidad en las lectura
 
 [4] Eclipse Foundation, "Eclipse Paho and Mosquitto Security Configuration with TLS," Eclipse IoT Project, 2024. [En línea]. Disponible en: https://mosquitto.org/documentation/
 
+[5] OpenAI / Google Gemini, "Asistencia en el diseño de arquitectura y generación de diagramas Mermaid para el sistema IoT Carro RC," Modelo de lenguaje de gran escala, Mayo 2026. [En línea]. Disponible en: https://gemini.google.com
+
+[6] Anthropic Claude, "Optimización de estructura de datos binarios y documentación técnica de sistemas embebidos," Modelo de lenguaje de gran escala, Mayo 2026. [En línea]. Disponible en: https://claude.ai
+
 ---
 
 *Documentación del proyecto Carro RC IoT — Internet de las Cosas, Universidad de La Sabana 2026.*
