@@ -2,6 +2,7 @@
 
 **Curso:** Internet de las Cosas — Universidad de La Sabana, 2026  
 **Descripción:** Vehículo a escala controlado remotamente desde una app Android, con telemetría de velocidad (RPM) en tiempo real a través de un broker MQTT seguro desplegado en AWS EC2.
+**Viabilidad Económica y Tecnológica:** El costo total del hardware del prototipo asciende a $121.000 COP, posicionándose como una solución educativa de bajo costo un 70% más económica que las plataformas comerciales de desarrollo IoT de arquitectura cerrada. Al emplear infraestructura en la nube bajo la capa gratuita de AWS (EC2 Micro) y software de código abierto (Mosquitto, Android Jetpack Compose), la solución es altamente replicable y viable para su implementación en laboratorios de robótica universitaria a gran escala.
 
 ---
 
@@ -439,8 +440,11 @@ La limitación más relevante del prototipo es la **inestabilidad en las lectura
 ## 11. Referencias Bibliográficas
 
 [1] ESP32 Core for Arduino, "WiFi and WiFiClientSecure Documentation," Espressif Systems, 2024. [En línea]. Disponible en: https://github.com/espressif/arduino-esp32
+
 [2] HiveMQ, "HiveMQ MQTT Client Library for Java/Kotlin," HiveMQ GmbH, 2025. [En línea]. Disponible en: https://github.com/hivemq/hivemq-mqtt-client
+
 [3] J. Case et al., "A Simple Network Management Protocol (SNMP)," RFC 1157, May 1990. (Adaptado conceptualmente para Mosquitto MQTT Broker en AWS EC2, 2026).
+
 [4] Eclipse Foundation, "Eclipse Paho and Mosquitto Security Configuration with TLS," Eclipse IoT Project, 2024. [En línea]. Disponible en: https://mosquitto.org/documentation/
 
 ---
