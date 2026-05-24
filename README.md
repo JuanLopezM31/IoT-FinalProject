@@ -385,17 +385,13 @@ graph TD
 
 | Métrica | Valor | Máximo disponible | % Uso |
 |---|---|---|---|
-| Flash (Program Storage) | XXXX KB | 1.310 KB | XX% |
-| RAM (Dynamic Memory) | XXXX KB | 327 KB | XX% |
+| Flash (Program Storage) | 1.099 KB | 1.310 KB | 85% |
+| RAM (Dynamic Memory) | 39.7 KB | 327 KB | 12% |
 
-**Cómo obtener estos valores:**
-1. Abrir `carro_rc_mqtt.ino` en Arduino IDE 2.x
-2. Tools → Board → esp32 → **ESP32 Dev Module**
-3. Clic en ✔ **Verify** (sin conectar el ESP32)
-4. En la consola inferior aparece:
+**Resultados del compilador en consola:**
 ```
-Sketch uses XXXXXX bytes (XX%) of program storage space.
-Global variables use XXXXX bytes (XX%) of dynamic memory.
+Sketch uses 1125858 bytes (85%) of program storage space. Maximum is 1310720 bytes.
+Global variables use 40688 bytes (12%) of dynamic memory, leaving 286992 bytes for local variables. Maximum is 327680 bytes.
 ```
 
 ---
