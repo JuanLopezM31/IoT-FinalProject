@@ -269,14 +269,29 @@ graph TD
 
 ## 8. Uso de Memoria
 
-> Valores de optimización arrojados por el compilador al desactivar el pesado stack Wi-Fi/TLS en el microcontrolador en favor de una solución puramente local por BLE (Placa: **ESP32 Dev Module**):
+> Valores obtenidos al presionar **Verificar (✔)** en Arduino IDE 2.x con la placa **ESP32 Dev Module**.
 
-| Métrica | Valor Consumido | Máximo Disponible | % de Uso |
+
+
+| Métrica | Valor | Máximo disponible | % Uso |
+
 |---|---|---|---|
-| Flash (Program Storage) | 720 KB | 1310 KB | 55% |
-| RAM (Dynamic Memory) | 26.2 KB | 327 KB | 8% |
 
-*(Al remover por completo el stack de red MQTTS y Wi-Fi del microcontrolador y delegarlo en el Gateway móvil, se redujo el uso de memoria Flash de un 85% a solo un 55%, eliminando cualquier riesgo de desbordamiento de memoria y asegurando la estabilidad del firmware a largo plazo).*
+| Flash (Program Storage) | 1.099 KB | 1.310 KB | 85% |
+
+| RAM (Dynamic Memory) | 39.7 KB | 327 KB | 12% |
+
+
+
+**Resultados del compilador en consola:**
+
+```
+
+Sketch uses 1125858 bytes (85%) of program storage space. Maximum is 1310720 bytes.
+
+Global variables use 40688 bytes (12%) of dynamic memory, leaving 286992 bytes for local variables. Maximum is 327680 bytes.
+
+```
 
 ---
 
