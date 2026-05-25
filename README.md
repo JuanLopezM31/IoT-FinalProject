@@ -1,10 +1,10 @@
-# 🚗 Carro RC IoT — ESP32 + MQTT + Android
+# 🚗 Carro RC IoT — ESP32 (BLE) + Android Gateway + MQTT
 
 **Curso:** Internet de las Cosas — Universidad de La Sabana, 2026.
 
-**Descripción:** Vehículo a escala controlado remotamente desde una app Android, con telemetría de velocidad (RPM) en tiempo real a través de un broker MQTT seguro desplegado en AWS EC2.
+**Descripción:** Vehículo a escala controlado localmente mediante **Bluetooth Low Energy (BLE)** desde una app Android (Jetpack Compose). La aplicación móvil funciona como un *Gateway IoT*, asumiendo la responsabilidad de conectarse a la nube para enviar la telemetría de velocidad (RPM) en tiempo real a un broker MQTT seguro desplegado en AWS EC2.
 
-**Viabilidad Económica y Tecnológica:** El costo total del hardware del prototipo asciende a $121.000 COP, posicionándose como una solución educativa de bajo costo un 70% más económica que las plataformas comerciales de desarrollo IoT de arquitectura cerrada. Al emplear infraestructura en la nube bajo la capa gratuita de AWS (EC2 Micro) y software de código abierto (Mosquitto, Android Jetpack Compose), la solución es altamente replicable y viable para su implementación en laboratorios de robótica universitaria a gran escala.
+**Viabilidad Económica y Tecnológica:** El costo total del hardware del prototipo asciende a $121.000 COP, posicionándose como una solución educativa de bajo costo un 70% más económica que las plataformas comerciales de desarrollo IoT de arquitectura cerrada. Al delegar la conectividad en la nube a la aplicación móvil, se reduce drásticamente el consumo energético del ESP32 y se elimina la necesidad de gestionar credenciales Wi-Fi dinámicas en el firmware del vehículo.
 
 ---
 
@@ -12,62 +12,46 @@
 
 1. [Visión General](#1-visión-general)
 2. [Arquitectura del Sistema](#2-arquitectura-del-sistema)
-3. [Diagrama de Flujo / Secuencia](#3-diagrama-de-flujo--secuencia)
-4. [Tópicos MQTT](#4-tópicos-mqtt)
-5. [Endpoints API](#5-endpoints-api)
+3. [Diagramas de Secuencia y Flujo](#3-diagramas-de-secuencia-y-flujo)
+4. [Protocolo de Comunicación Local (BLE)](#4-protocolo-de-communication-local-ble)
+5. [Tópicos MQTT (App ↔ Cloud)](#5-tópicos-mqtt-app--cloud)
 6. [Hardware y Esquemático](#6-hardware-y-esquemático)
 7. [Librerías Utilizadas](#7-librerías-utilizadas)
-8. [Uso de Memoria](#8-uso-de-memoria)
-9. [Limitaciones](#9-limitaciones)
-10. [Posibilidades de Mejora](#10-posibilidades-de-mejora)
-11. [Referencias Bibliográficas](#11-Referencias-Bibliográficas)
+8. [Mecanismos de Robustez y Seguridad](#8-mecanismos-de-robustez-y-seguridad)
 
 ---
 
 ## 1. Visión General
 
-**Problema:** Dificultad para el monitoreo y control remoto de variables críticas (velocidad y dirección) en prototipos de robótica móvil de bajo costo.
-
-**Usuarios objetivo:** Estudiantes de Ingeniería Informática y desarrolladores de sistemas embebidos.
-
-**Solución:** Un vehículo a escala basado en el ESP32, controlado desde una app Android (Jetpack Compose), que reporta telemetría de RPM en tiempo real a través de un broker MQTT con encriptación TLS desplegado en AWS EC2.
+- **Problema:** El uso directo de Wi-Fi y protocolos pesados en la nube desde microcontroladores en movimiento genera inestabilidad por pérdidas de señal local, alto consumo energético y overhead de procesamiento por encriptación TLS.
+- **Usuarios objetivo:** Estudiantes de Ingeniería y desarrolladores de robótica móvil.
+- **Solución:** Arquitectura híbrida. Control local de ultra baja latencia mediante **BLE (GATT Server)** entre el coche y el celular. Monitoreo remoto global delegando el stack de red **MQTT (MQTTS con TLS 1.3)** a la aplicación de Android.
 
 ---
 
 ## 2. Arquitectura del Sistema
 
-<!-- ============================================================
-     DIAGRAMA 1 — DIAGRAMA DE BLOQUES DE ARQUITECTURA
-     Tipo sugerido: flowchart LR (izquierda a derecha)
-     Nodos sugeridos:
-       App Android → Broker MQTT (AWS EC2) → ESP32
-       ESP32 → L298N → Motores DC
-       ESP32 → Sensor HC-020K (flecha de vuelta a ESP32)
-     Este diagrama cumple el requisito de "diagrama de bloques
-     de la arquitectura (software y hardware)" de la rúbrica.
-     ============================================================ -->
+El ESP32 opera de forma local e independiente de internet. La app móvil es el puente de datos (*Edge Gateway*):
 
 ```mermaid
 graph LR
-    subgraph Cliente_Android [App Android - Jetpack Compose]
-        A[UI Control Center] -->|Comandos 2 Bytes| B(MqttManager TLS)
+    subgraph Prototipo_Embebido [Carro RC - ESP32]
+        H[Sensor RPM H0200K] -->|Interrupciones ISR| E[ESP32 Core]
+        E -->|PWM / Lógica| F[Puente H L298N]
+        F -->|Voltaje Variable| G[Motores DC]
+    end
+
+    subgraph Cliente_Android [Celular - Android Gateway]
+        A[UI Control Center] -->|BLE WRITE (2 Bytes)| E
+        E -->|BLE NOTIFY (2 Bytes)| B(MqttManager TLS)
+        A -.->|Flujo Interno| B
     end
 
     subgraph Nube_AWS [AWS EC2 Cloud]
         C[Broker Mosquitto Port:8883]
     end
 
-    subgraph Hardware_Carro [Prototipo Embebido]
-        D(WiFiClientSecure) -->|Suscribe Control| E[ESP32 Core]
-        E -->|PWM / Pines Logica| F[Puente H L298N]
-        F -->|Voltaje Variable| G[Motores DC]
-        H[Sensor HC-020K] -->|Interrupciones ISR| E
-        E -->|Publica RPM 2 Bytes| D
-    end
-
     B <-->|MQTTS Encriptado TLS| C
-    C <-->|MQTTS Encriptado TLS| D
-    E -.->|HTTP GET /status| I[Red Local WiFi]
 ```
 
 **Descripción del flujo:**
@@ -101,18 +85,17 @@ graph LR
 sequenceDiagram
     autonumber
     actor Usuario
-    participant App as App Android
-    participant Broker as Broker AWS (Mosquitto)
-    participant ESP as ESP32 (Carro)
+    participant App as App Android (Jetpack Compose)
+    participant ESP as ESP32 (Carro BLE)
 
-    loop Cada 500ms mientras se mantiene presionado
+    loop Cada ciclo de pulsación (Local)
         Usuario->>App: Mantiene presionado D-pad
-        App->>Broker: PUBLISH carro/control [0x46, 0xFF] (QoS 0)
-        Broker->>ESP: Forward Comando a los Motores
+        App->>ESP: BLE WRITE Characteristic [Byte0: Dirección, Byte1: Velocidad]
+        ESP->>ESP: Actualiza salidas de pines (Motores en marcha)
     end
     Usuario->>App: Suelta el botón
-    App->>Broker: PUBLISH carro/control [0x53, 0x00] (QoS 1)
-    Broker->>ESP: Forward Comando STOP
+    App->>ESP: BLE WRITE Characteristic [0x53, 0x00] (STOP)
+    ESP->>ESP: Detiene motores inmediatamente
 ```
 
 ### 3.2 Secuencia de telemetría (ESP32 → App)
@@ -131,17 +114,17 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Sensor as Sensor HC-020K
-    participant ESP as ESP32 (Carro)
+    participant Sensor as Sensor RPM H0200K
+    participant ESP as ESP32 (Carro BLE)
+    participant App as App Android (Gateway)
     participant Broker as Broker AWS (Mosquitto)
-    participant App as App Android
 
     loop Cada 250ms continuamente
-        Sensor->>ESP: Genera pulsos por interrupcion (Paso de ranuras)
-        ESP->>ESP: Calcula RPM actuales
-        ESP->>Broker: PUBLISH carro/telemetria [RPM_High, RPM_Low] (QoS 1)
-        Broker->>App: Forward Datos de Velocidad
-        App->>App: Actualiza interfaz (Tacometro)
+        Sensor->>ESP: Envía pulsos por ranura (Interrupción física)
+        ESP->>ESP: Calcula RPM atómicamente
+        ESP->>App: BLE NOTIFY [RPM_High, RPM_Low] (Big-Endian)
+        App->>App: Actualiza tacómetro en la interfaz gráfica
+        App->>Broker: MQTT PUBLISH carro/telemetria [JSON o Binario] (QoS 1)
     end
 ```
 
@@ -160,19 +143,21 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([Inicio loop principal ESP32]) --> Recv{¿Llego mensaje MQTT?}
+    Start([Inicio loop principal ESP32]) --> CheckConn{¿Dispositivo conectado?}
     
-    Recv -- Si --> Update[Actualizar Motores con nueva Dir/Vel]
-    Update --> ResetWD[Reiniciar Temporizador Watchdog: t_ultimo = millis]
-    ResetWD --> CheckTime
+    CheckConn -- No --> ForceStop[Forzar Parada de Emergencia: Velocidad = 0 / STOP]
+    ForceStop --> ReAdvertise[Mantener BLE Advertising Activo]
+    ReAdvertise --> EndLoop
     
-    Recv -- No --> CheckTime{¿millis - t_ultimo > 1500 ms?}
+    CheckConn -- Sí --> CheckTime{¿millis - t_ultimoComando > 1500 ms?}
     
-    CheckTime -- Si (Se perdio señal) --> ActionWD[WATCHDOG TRIGGERED: Frenado de emergencia]
-    ActionWD --> SetStop[Fijar velocidad en 0 y Estado STOP]
-    SetStop --> EndLoop([Fin del ciclo])
+    CheckTime -- Sí (Pérdida de señal) --> ActionWD[WATCHDOG TRIGGERED: Frenado inmediato]
+    ActionWD --> ApplyStop[Fijar velocidad en 0 y aplicar a Motores]
     
-    CheckTime -- No (Conexion segura) --> EndLoop
+    CheckTime -- No (Conexión Segura) --> ReadSensors[Procesar pulsos de RPM y enviar NOTIFY]
+    
+    ApplyStop --> EndLoop([Fin del ciclo])
+    ReadSensors --> EndLoop
 ```
 
 ---
