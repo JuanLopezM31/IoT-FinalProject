@@ -42,8 +42,8 @@ graph LR
     end
 
     subgraph Cliente_Android [Celular - Android Gateway]
-        A[UI Control Center] -->|BLE WRITE (2 Bytes)| E
-        E -->|BLE NOTIFY (2 Bytes)| B(MqttManager TLS)
+        A[UI Control Center] -->| "BLE WRITE (2 Bytes)" | E
+        E -->| "BLE NOTIFY (2 Bytes)" | B(MqttManager TLS)
         A -.->|Flujo Interno| B
     end
 
