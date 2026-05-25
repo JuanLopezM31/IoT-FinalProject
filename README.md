@@ -273,24 +273,17 @@ graph TD
 
 
 
-| Métrica | Valor | Máximo disponible | % Uso |
-
+| Métrica | Valor Consumido | Máximo Disponible | % de Uso |
 |---|---|---|---|
-
-| Flash (Program Storage) | 1.099 KB | 1.310 KB | 85% |
-
-| RAM (Dynamic Memory) | 39.7 KB | 327 KB | 12% |
+| Flash (Program Storage) | 720 KB | 1310 KB | 85% |
+| RAM (Dynamic Memory) | 26.2 KB | 327 KB | 12% |
 
 
 
 **Resultados del compilador en consola:**
-
 ```
-
 Sketch uses 1125858 bytes (85%) of program storage space. Maximum is 1310720 bytes.
-
 Global variables use 40688 bytes (12%) of dynamic memory, leaving 286992 bytes for local variables. Maximum is 327680 bytes.
-
 ```
 
 ---
