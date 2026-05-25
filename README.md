@@ -327,4 +327,4 @@ La limitación más relevante del prototipo es la **inestabilidad en las lectura
 [3] Eclipse Foundation, "Eclipse Mosquitto Security Configuration with TLS/SSL," *Mosquitto Documentation*, 2024. [En línea]. Disponible en: https://mosquitto.org/documentation/
 
 ---
-*Documentación oficial desarrollada para la asignatura Internet de las Cosas, Universidad de La Sabana, 2026.*
+*Documentación oficial desarrollada para la asignatura Internet de las Cosas, Universidad de La Sabana, 2026. Juan Felipe Moncada, Samuel Arcos y Juan Felipe Cardenas*
