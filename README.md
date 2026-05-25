@@ -36,22 +36,22 @@ El ESP32 opera de forma local e independiente de internet. La app móvil es el p
 ```mermaid
 graph LR
     subgraph Prototipo_Embebido [Carro RC - ESP32]
-        H[Sensor RPM H0200K] -->|Interrupciones ISR| E[ESP32 Core]
-        E -->|PWM / Lógica| F[Puente H L298N]
-        F -->|Voltaje Variable| G[Motores DC]
+        H[Sensor RPM H0200K] -- "Interrupciones ISR" --> E[ESP32 Core]
+        E -- "PWM / Lógica" --> F[Puente H L298N]
+        F -- "Voltaje Variable" --> G[Motores DC]
     end
 
     subgraph Cliente_Android [Celular - Android Gateway]
-        A[UI Control Center] -->| "BLE WRITE (2 Bytes)" | E
-        E -->| "BLE NOTIFY (2 Bytes)" | B(MqttManager TLS)
-        A -.->|Flujo Interno| B
+        A[UI Control Center] -- "BLE WRITE (2 Bytes)" --> E
+        E -- "BLE NOTIFY (2 Bytes)" --> B(MqttManager TLS)
+        A -. "Flujo Interno" .-> B
     end
 
     subgraph Nube_AWS [AWS EC2 Cloud]
         C[Broker Mosquitto Port:8883]
     end
 
-    B <-->|MQTTS Encriptado TLS| C
+    B -- "MQTTS Encriptado TLS" <--> C
 ```
 
 **Descripción del flujo:**
