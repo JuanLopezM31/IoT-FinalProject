@@ -299,7 +299,8 @@ Global variables use 40688 bytes (12%) of dynamic memory, leaving 286992 bytes f
 ## 10. Limitaciones
 
 ### Ruido en la lectura del sensor HC-020K
-La limitación más relevante del prototipo es la **inestabilidad en las lecturas de RPM del sensor HC-020K**. Con una velocidad de motor constante (PWM fijo), el sensor reporta fluctuaciones drásticas debido a:
+La limitación más relevante del prototipo es la **inestabilidad en las lecturas de RPM del sensor HC-020K**. Con una velocidad de motor constante (PWM fijo), el sensor reporta valores que varían aproximadamente **±300 RPM** entre mediciones consecutivas.
+**Causas identificadas:**
 - **Vibración mecánica:** El chasis de plástico propaga oscilaciones físicas que confunden al fototransistor generando falsos pulsos.
 - **Rebote eléctrico (bouncing):** Los flancos de subida del sensor presentan ruido eléctrico de microsegundos que la interrupción ISR cuenta como giros extra.
 
